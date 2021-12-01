@@ -1,0 +1,39 @@
+#!/bin/bash
+
+DOCKERFILE="$1"
+
+if [[ -z "${DOCKERFILE}" ]]; then
+    DOCKERFILE="Dockerfile"
+fi
+
+if [[ ! -f "${DOCKERFILE}" ]]; then
+    echo "Dockerfile '${DOCKERFILE}' not found." >&2
+    exit 1
+fi
+
+if ! git diff --exit-code --no-patch "${DOCKERFILE}" > /dev/null 2>&1 ; then
+    echo "Dockerfile '${DOCKERFILE}' is modified, refusing to build image." >&2
+    exit 1
+fi
+
+GIT_HASH=$(git rev-parse --short HEAD)
+
+if [[ -z ${GIT_HASH} ]]; then
+    echo "Failed to determine Git hash." >&2
+    exit 1
+fi
+
+DOCKER_IMAGE="dockerhub.toptica.com/ubuntu-20.04-for-arm-embedded-builds"
+DOCKER_TAG="$(date +%Y%m%dT%H%M%S).${GIT_HASH}"
+
+echo "Building image ${DOCKER_IMAGE}:${DOCKER_TAG}"
+
+docker build --tag "${DOCKER_IMAGE}:${DOCKER_TAG}" - < "${DOCKERFILE}"
+
+if [[ $? -eq 0 ]]; then
+    cat <<EOF
+Successfully built Docker image.  Push it to the Docker Hub instance using
+
+   docker push '${DOCKER_IMAGE}:${DOCKER_TAG}'
+EOF
+fi

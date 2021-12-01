@@ -1,0 +1,6 @@
+/.build/
+/compile_commands.json
+/firmware/RTE/*.gpdsc
+/firmware/RTE/.mxproject
+.vscode
+build

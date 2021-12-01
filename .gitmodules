@@ -1,0 +1,3 @@
+[submodule "firmware/third_party/tsp"]
+	path = firmware/third_party/tsp
+	url = ../../libtool/tsp.git
