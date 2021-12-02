@@ -1,0 +1,126 @@
+pipeline {
+    agent {
+        dockerfile {
+            label 'docker'
+        }
+    }
+
+    options {
+        timestamps()
+        buildDiscarder(logRotator(
+            artifactNumToKeepStr: '1',
+            numToKeepStr: '10')
+        )
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                dir('source') {
+                    checkout(scm)
+                }
+            }
+        }
+        stage('Build') {
+            parallel {
+                stage('Build unittests with GCC') {
+                    steps {
+                        cmakeBuild(
+                            generator: 'Ninja',
+                            buildDir: 'build-gcc',
+                            sourceDir: 'source',
+                            cmakeArgs: '-DTSP_BUILD_UNITTESTS=ON -DCMAKE_CXX_COMPILER=g++',
+                            installation: 'InSearchPath',
+                            cleanBuild: false,
+                            steps: [[
+                                args: 'all',
+                            ]]
+                        )
+                    }
+                }
+                stage('Build unittests with Clang') {
+                    steps {
+                        cmakeBuild(
+                            generator: 'Ninja',
+                            buildDir: 'build-clang',
+                            sourceDir: 'source',
+                            cmakeArgs: '-DTSP_BUILD_UNITTESTS=ON -DCMAKE_CXX_COMPILER=clang++',
+                            installation: 'InSearchPath',
+                            cleanBuild: false,
+                            steps: [[
+                                args: 'all',
+                            ]]
+                        )
+                    }
+                }
+                stage('Build documentation') {
+                    steps {
+                        cmakeBuild(
+                            generator: 'Ninja',
+                            buildDir: 'documentation',
+                            sourceDir: 'source',
+                            installation: 'InSearchPath',
+                            cleanBuild: false,
+                            steps: [[
+                                args: 'doxygen',
+                            ]]
+                        )
+                    }
+                }
+            }
+        }
+        stage('Execute unittests') {
+            steps {
+                ctest(
+                    workingDir: 'build-gcc/test',
+                    installation: 'InSearchPath',
+                )
+                cmakeBuild(
+                    generator: 'Ninja',
+                    buildDir: 'build-gcc',
+                    sourceDir: 'source',
+                    cmakeArgs: '-DTSP_BUILD_UNITTESTS=ON',
+                    installation: 'InSearchPath',
+                    cleanBuild: false,
+                    steps: [[
+                        args: 'TSP_Library_Unit_Tests_cov_report',
+                    ]]
+                )
+                warnings([
+                    consoleParsers: [
+                        [parserName: 'GNU Make + GNU C Compiler (gcc)']
+                    ],
+                    unstableTotalAll: '0',
+                    failedTotalAll: '0'
+                    ]
+                )
+                publishHTML([
+                    reportDir: 'build-gcc/test/coverage_report',
+                    reportFiles: 'index.html',
+                    reportName: 'TSP Code Coverage Report',
+                    reportTitles: 'TSP Code Coverage Report',
+                    keepAll: false,
+                    alwaysLinkToLastBuild: false,
+                    allowMissing: false,
+                    ]
+                )
+            }
+        }
+    }
+
+    post {
+        always {
+            dir('build-gcc') {
+                junit('test/TSP_Library_Unit_Tests.xml')
+                archiveArtifacts('test/TSP_Library_Unit_Tests.xml')
+                archiveArtifacts('test/coverage_report/*.html')
+            }
+            dir('documentation') {
+                archiveArtifacts('html/**/*')
+            }
+        }
+        cleanup {
+            cleanWs()
+        }
+    }
+}

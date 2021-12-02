@@ -1,41 +1,49 @@
 #undef __STRICT_ANSI__
 #define _USE_MATH_DEFINES
-#include <cmath>
 #include "dds.hpp"
+#include <cmath>
 
+// DDS::DDS(
+//     bool      enable,
+//     float     amp,
+//     float     offset,
+//     float     freq,
+//     float     phaseOffset,
+//     float     fclk,
+//     int       accumulatorWidth,
+//     int       LUTGridWidth,
+//     SinusLUT& LUT)
+//   : _enable(enable),
+//     _amp(amp),
+//     _offset(offset),
+//     _phaseOffset(phaseOffset),
+//     _accumulatorWidth(accumulatorWidth),
+//     _LUTGridWidth(LUTGridWidth),
+//     _LUT(LUT)
 
-DDS::DDS(
-    bool      enable,
-    float     amp,
-    float     offset,
-    float     freq,
-    float     phaseOffset,
-    float     fclk,
-    int       accumulatorWidth,
-    int       LUTGridWidth,
-    SinusLUT& LUT)
-  : _enable(enable),
-    _amp(amp),
-    _offset(offset),
-    _phaseOffset(phaseOffset),
-    _accumulatorWidth(accumulatorWidth),
-    _LUTGridWidth(LUTGridWidth),
-    _LUT(LUT)
+DDS::DDS(const DDSParam& dds_param, const float freq, const float fclk)
+  : _enable(dds_param.enable),
+    _amp(dds_param.amp),
+    _offset(dds_param.offset),
+    _phaseOffset(dds_param.phaseOffset),
+    _accumulatorWidth(dds_param.accumulatorWidth),
+    _LUTGridWidth(dds_param.LUTGridWidth),
+    _LUT(dds_param.LUT)
 {
     auto phi     = _phaseOffset * M_PI / 180.0;
     auto phi_lag = _phaseOffset_1ag * M_PI / 180.0;
-    _TW    = round((freq) / ((fclk) / (1 << _accumulatorWidth)));
-    _detTW = round((phi - phi_lag) * (1 << _accumulatorWidth) / M_PI_2);
+    _TW          = round((freq) / ((fclk) / (1 << _accumulatorWidth)));
+    _detTW       = round((phi - phi_lag) * (1 << _accumulatorWidth) / M_PI_2);
 }
 
-void DDS::Calc(float &out, float &shift_out)
+void DDS::Calc(float& out, float& shift_out)
 {
-    _TWSum         += _TW;
-    auto phase_out  = _TWSum;
+    _TWSum += _TW;
+    auto phase_out = _TWSum;
 
     if (_phaseOffset != _phaseOffset_1ag) {
-        _TWSumShift      += _TW + _detTW;
-        _phaseOffset_1ag  = _phaseOffset;
+        _TWSumShift += _TW + _detTW;
+        _phaseOffset_1ag = _phaseOffset;
 
     } else {
         _TWSumShift += _TW;

@@ -3,6 +3,8 @@ add_subdirectory(application)
 add_subdirectory(third_party/tsp)
 add_subdirectory(drivers/peripherals)
 add_subdirectory(components/DDS)
+add_subdirectory(components/FIR)
+add_subdirectory(components/LockIn)
 add_subdirectory(hal)
 ## Firmware version
 set(FIRMWARE_VERSION_MAJOR "1")

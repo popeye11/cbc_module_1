@@ -16,5 +16,6 @@ target_link_libraries(${lib}
     hal
     Drivers::peripherals
     components::dds
+    components::fir
     lib::tsp
 )

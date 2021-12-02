@@ -1,0 +1,5 @@
+#pragma once
+
+#include <array>
+
+const std::array<char, @VERSION_LENGTH@> g_version{"@VERSION@"};
