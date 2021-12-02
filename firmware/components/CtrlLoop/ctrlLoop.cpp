@@ -22,13 +22,10 @@ void ControlLoop::step(float error, float& sctrl_out, float& fctrl_out)
 
     _count++;
     auto lockinSig = _lockin->LockIn_run(error);
-    fctrl_out      = _pidf->run(error);
-    if (_count < CountLim) {
-        _count++;
-        sctrl_out = _pids->run(error);
-
-    } else {
-        _count = 0;
+    fctrl_out      = _pidf->run(lockinSig);
+    if (_count > CountLim) {
+        sctrl_out = _pids->run(lockinSig); //(float)(_count) / 100 * 2; //
+        _count    = 0;
     }
 }
 

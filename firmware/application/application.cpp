@@ -17,23 +17,6 @@
 #include "version.h"
 #include <stm32h7xx.h>
 //@todo #include <tsp/pid.hpp>
-// namespace {
-// float    DIG2VOLT16BIT  = 3.7e-05;    // 2.45[v]/65535 ->16bit
-// float    VOLT2DIG16BIT  = 2.6214e+04; // 2.5[v]/2^16->16bit
-// float    kp_f           = 1.0f;
-// float    ki_f           = 0.0f;
-// float    kd_f           = 0.0f;
-// float    kp_s           = 1.0f;
-// float    ki_s           = 0.0f;
-// float    kd_s           = 0.0f;
-// float    DDSamp         = 1.0f;
-// float    DDSAmpOffset   = DDSamp;
-// float    DDSfreq        = 5000.0f;
-// float    DDSphaseOffset = 0.0f;
-// float    FIRFreq        = 1000.0f;
-// int      AW             = 16;
-// int      LUTL           = 10;
-// SinusLUT LUT;
 
 // struct PIDParam pid_param = {kp_f, ki_f, kd_f, kp_s, ki_s, kd_s};
 // struct DDSParam dds_param = {true, DDSamp, DDSAmpOffset, DDSfreq, DDSphaseOffset, MainFreq, AW, LUTL, LUT};
@@ -41,22 +24,20 @@
 // LockIn*         lock_in   = new LockIn(dds_param, FIRFreq);
 // ControlLoop*    ctrl      = new ControlLoop(pid_param, dds_param, FIRFreq);
 // } // namespace
-
-void ctrl_test()
+struct PIDParam pid_param_CHN1 = {kp_f, ki_f, kd_f, kp_s, ki_s, kd_s};
+struct DDSParam dds_param      = {true, DDSamp, DDSAmpOffset, DDSfreq, DDSphaseOffset, MainFreq, AW, LUTL, LUT};
+ControlLoop     actor_CH1      = ControlLoop(pid_param_CHN1, dds_param, FIRFreq);
+CHN_Param       CHN1_param     = {DAC_CHN1_FAST, DAC_SLOW_CHN1};
+Actuator        act_chn1       = Actuator(actor_CH1, CHN1_param);
+void            ctrl_test()
 {
-    // int   count = 0;
-    // float sctrl_out;
-    // float fctrl_out;
+    int count = 0;
     HAL_GPIO_TogglePin(DEBUGGING_PORT, DEBUGGING_PIN);
-    // while (count < 150) {
-    //     count++;
-    // }
-    act_chn1.run();
-    // const auto adc_values = read_LD_signals();
-    // auto       pd_signal  = adc_values[0] * DIG2VOLT16BIT;
-    // ctrl->step(pd_signal, sctrl_out, fctrl_out);
-    // uint16_t dacout[2] = {fctrl_out * VOLT2DIG16BIT, sctrl_out * VOLT2DIG16BIT};
-    // transmit_DAC_values(dacout);
+    while (count < 150) {
+        count++;
+    }
+    // actuators_run();
+    act_chn1.execute();
 }
 // void Lock_In_test()
 // {
@@ -103,7 +84,6 @@ void application()
     HAL_DBGMCU_EnableDBGStopMode();
     enable_extra_usage_faults();
     peripheral_initialization();
-    Actor act_chn1;
     while (true) {
     }
 }

@@ -1,25 +1,32 @@
 #pragma once
 #include "actors.h"
 #include "ctrlLoop.hpp"
-struct PIDParam pid_param = {kp_f, ki_f, kd_f, kp_s, ki_s, kd_s};
-struct DDSParam dds_param = {true, DDSamp, DDSAmpOffset, DDSfreq, DDSphaseOffset, MainFreq, AW, LUTL, LUT};
+#include "peripherals.hpp"
 
-Actor::Actor()
-{
-    actor = new ControlLoop(pid_param, dds_param, FIRFreq);
-}
-//
-void Actor::actors_run()
+//   Actuator(ControlLoop ctrl, CHN_Param chn_param);
+// public:
+//     Actuator(ControlLoop ctrl, CHN_Param chn_param);
+//     void execute();
+
+//   private:
+//     ControlLoop _ctrl;
+//     CHN_Param   _chn_param;
+// void actuators_run();
+
+Actuator::Actuator(ControlLoop& ctrl, CHN_Param& chn_param) : _ctrl(ctrl), _chn_param(chn_param){};
+void Actuator::execute()
 {
     float      sctrl_out;
     float      fctrl_out;
     const auto adc_values = read_LD_signals();
     auto       pd_signal  = adc_values[0] * DIG2VOLT16BIT;
-    actor->step(pd_signal, sctrl_out, fctrl_out);
+    _ctrl.step(pd_signal, sctrl_out, fctrl_out); // actor_CH1
     uint16_t dacout[2] = {fctrl_out * VOLT2DIG16BIT, sctrl_out * VOLT2DIG16BIT};
-    transmit_DAC_values(dacout);
+    transmit_DAC_values(dacout, _chn_param); // CHN1_param
 }
-Actor::~Actor()
-{
-    delete actor;
-}
+// void actuators_run()
+// {
+
+//     Actuator act_chn1 = Actuator(actor_CH1, CHN1_param);
+//     act_chn1.execute();
+// }

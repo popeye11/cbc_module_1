@@ -10,18 +10,21 @@ float    ki_s           = 0.0f;
 float    kd_s           = 0.0f;
 float    DDSamp         = 1.0f;
 float    DDSAmpOffset   = DDSamp;
-float    DDSfreq        = 5000.0f;
+float    DDSfreq        = 20000.0f;
 float    DDSphaseOffset = 0.0f;
-float    FIRFreq        = 1000.0f;
+float    FIRFreq        = 2000.0f;
 int      AW             = 16;
 int      LUTL           = 10;
 SinusLUT LUT;
 } // namespace
-class Actor
+class Actuator
 {
   public:
-    Actor();
-    ControlLoop* actor;
-    void         actors_run();
+    Actuator(ControlLoop& ctrl, CHN_Param& chn_param);
+    void execute();
+
+  private:
+    ControlLoop _ctrl;
+    CHN_Param   _chn_param;
 };
-void actors_init();
+void actuators_run();
