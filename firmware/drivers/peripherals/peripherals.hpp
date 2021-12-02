@@ -24,4 +24,4 @@ const uint8_t  CTRL_CHN2_NR = 0;
 
 void                         peripheral_initialization();
 std::array<uint32_t, LDCHNs> read_LD_signals();
-void                         transmit_DAC_values(uint16_t dacvalue);
+void                         transmit_DAC_values(uint16_t dacvalue[2]);

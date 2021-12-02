@@ -2,6 +2,7 @@ set(lib "application")
 
 add_library(${lib} OBJECT
     application.cpp
+    actors.cpp
 )
 
 target_include_directories(${lib} PRIVATE
@@ -17,5 +18,7 @@ target_link_libraries(${lib}
     Drivers::peripherals
     components::dds
     components::fir
+    components::lockin
+    components::CtrlLoop
     lib::tsp
 )

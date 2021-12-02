@@ -3,28 +3,12 @@
 #include "dds.hpp"
 #include <cmath>
 
-// DDS::DDS(
-//     bool      enable,
-//     float     amp,
-//     float     offset,
-//     float     freq,
-//     float     phaseOffset,
-//     float     fclk,
-//     int       accumulatorWidth,
-//     int       LUTGridWidth,
-//     SinusLUT& LUT)
-//   : _enable(enable),
-//     _amp(amp),
-//     _offset(offset),
-//     _phaseOffset(phaseOffset),
-//     _accumulatorWidth(accumulatorWidth),
-//     _LUTGridWidth(LUTGridWidth),
-//     _LUT(LUT)
-
-DDS::DDS(const DDSParam& dds_param, const float freq, const float fclk)
+DDS::DDS(const DDSParam& dds_param)
   : _enable(dds_param.enable),
     _amp(dds_param.amp),
     _offset(dds_param.offset),
+    _freq(dds_param.freq),
+    _fclk(dds_param.fclk),
     _phaseOffset(dds_param.phaseOffset),
     _accumulatorWidth(dds_param.accumulatorWidth),
     _LUTGridWidth(dds_param.LUTGridWidth),
@@ -32,7 +16,7 @@ DDS::DDS(const DDSParam& dds_param, const float freq, const float fclk)
 {
     auto phi     = _phaseOffset * M_PI / 180.0;
     auto phi_lag = _phaseOffset_1ag * M_PI / 180.0;
-    _TW          = round((freq) / ((fclk) / (1 << _accumulatorWidth)));
+    _TW          = round((_freq) / ((_fclk) / (1 << _accumulatorWidth)));
     _detTW       = round((phi - phi_lag) * (1 << _accumulatorWidth) / M_PI_2);
 }
 

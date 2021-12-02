@@ -8,7 +8,7 @@ class LockIn
   public:
     DDS* dds;
     FIR* fir;
-    LockIn(float DDSamp, float DDSAmpOffset, float DDSfreq, float DDSphaseOffset, float FIRFreq);
+    LockIn(DDSParam& dds_param, float FIRFreq);
     ~LockIn();
     float LockIn_run(float input);
 };

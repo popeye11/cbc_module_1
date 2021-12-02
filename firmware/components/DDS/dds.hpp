@@ -15,10 +15,11 @@ struct DDSParam
 class DDS
 {
   private:
-    bool  _enable = true;
-    float _amp    = 0.0;
-    float _offset = 0.0;
-
+    bool  _enable          = true;
+    float _amp             = 0.0;
+    float _offset          = 0.0;
+    float _freq            = 0.0;
+    float _fclk            = 0.0;
     float _phaseOffset     = 0.0;
     float _phaseOffset_1ag = 0.0;
 
@@ -34,15 +35,6 @@ class DDS
     SinusLUT _LUT;
 
   public:
-    // DDS(bool      enable,
-    //     float     amp,
-    //     float     offset,
-    //     float     freq,
-    //     float     phaseOffset,
-    //     float     fclk,
-    //     int       accumulatorWidth,
-    //     int       LUTGridWidth,
-    //     SinusLUT& LUT);
-    DDS(const struct DDSParam& dds_param, const float freq, const float fclk);
+    DDS(const struct DDSParam& dds_param);
     void Calc(float& out, float& shift_out);
 };
